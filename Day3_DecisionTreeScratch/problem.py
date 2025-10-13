@@ -12,7 +12,7 @@ def _gini(y):
     """Compute Gini impurity: 1 - p1² - p0²"""
     if y.size == 0:
         return 0.0
-    p1 = np.mean(y == 1)
+    p1 = np.mean(y == 1) #calculates the function of items that are in class 1
     return 1.0 - p1**2 - (1 - p1)**2
 
 
