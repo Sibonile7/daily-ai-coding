@@ -136,39 +136,60 @@ class DecisionTreeScratch:
         return np.array([self._predict_one(x) for x in X], dtype=int)
 
 
-# --------------------------- Random Forest ---------------------------
+# --------------------------- Random Forest (with OOB) ---------------------------
 class RandomForestScratch:
     """
     Random Forest with:
     - bootstrap sampling
     - feature subsampling per split (tree's max_features)
     - majority vote
+    - optional Out-of-Bag (OOB) score/error
     """
-    def __init__(self, n_trees: int = 25, max_depth: int = 5, min_samples_split: int = 2,
-                 max_features: Union[int, str, None] = "sqrt", bootstrap: bool = True,
+    def __init__(self,
+                 n_trees: int = 80,
+                 max_depth: int = 6,
+                 min_samples_split: int = 2,
+                 max_features: Union[int, str, "log2"] = "sqrt",
+                 bootstrap: bool = True,
+                 oob_score: bool = True,
                  random_state: Optional[int] = 42):
         self.n_trees = n_trees
         self.max_depth = max_depth
         self.min_samples_split = min_samples_split
         self.max_features = max_features
         self.bootstrap = bootstrap
+        self.oob_score = oob_score
         self.random_state = random_state
+
         self.rng = np.random.default_rng(random_state)
         self.trees: List[DecisionTreeScratch] = []
+        self.oob_score_: Optional[float] = None
+        self.oob_error_: Optional[float] = None
 
     def fit(self, X: Array, y: Array):
         X = np.asarray(X, dtype=float)
         if X.ndim == 1:
             X = X.reshape(-1, 1)
         y = np.asarray(y, dtype=int).reshape(-1)
-
         n = len(y)
+
         self.trees = []
+
+        # OOB accumulators
+        if self.oob_score:
+            oob_sum = np.zeros(n, dtype=float)   # sum of OOB predicted 1's
+            oob_cnt = np.zeros(n, dtype=int)     # number of OOB votes per sample
+
         for t in range(self.n_trees):
             if self.bootstrap:
-                idx = self.rng.integers(0, n, size=n)  # sample with replacement
+                idx = self.rng.integers(0, n, size=n)  # with replacement
+                in_bag = np.zeros(n, dtype=bool)
+                in_bag[idx] = True
+                oob_idx = np.where(~in_bag)[0]
             else:
                 idx = self.rng.permutation(n)
+                oob_idx = np.array([], dtype=int)
+
             Xb, yb = X[idx], y[idx]
 
             tree = DecisionTreeScratch(
@@ -178,17 +199,35 @@ class RandomForestScratch:
                 random_state=(None if self.random_state is None else self.random_state + t),
             ).fit(Xb, yb)
             self.trees.append(tree)
+
+            # OOB voting for this tree
+            if self.oob_score and oob_idx.size > 0:
+                preds = tree.predict(X[oob_idx])  # 0/1 labels
+                oob_sum[oob_idx] += preds
+                oob_cnt[oob_idx] += 1
+
+        # finalize OOB score/error
+        if self.oob_score:
+            mask = oob_cnt > 0
+            if np.any(mask):
+                oob_pred = (oob_sum[mask] / oob_cnt[mask]) >= 0.5
+                self.oob_score_ = float(np.mean(oob_pred == y[mask]))
+                self.oob_error_ = 1.0 - self.oob_score_
+            else:
+                # too small dataset → no OOB votes
+                self.oob_score_ = None
+                self.oob_error_ = None
+
         return self
 
     def predict(self, X: Array) -> Array:
         X = np.asarray(X, dtype=float)
         if X.ndim == 1:
             X = X.reshape(-1, 1)
-        # collect votes
+        if not self.trees:
+            raise RuntimeError("Model not fit.")
         votes = np.stack([tree.predict(X) for tree in self.trees], axis=0)  # (n_trees, n_samples)
-        # majority vote (ties go to 0)
-        sums = votes.sum(axis=0)
-        return (sums > (len(self.trees) / 2)).astype(int)
+        return (votes.sum(axis=0) > (len(self.trees) / 2)).astype(int)
 
 
 # --------------------------- Quick Demo ---------------------------
@@ -207,3 +246,6 @@ if __name__ == "__main__":
     rf = RandomForestScratch(n_trees=25, max_depth=6, max_features="sqrt", random_state=0).fit(Xtr, ytr)
     acc = (rf.predict(Xte) == yte).mean()
     print(f"[Demo] RandomForestScratch accuracy: {acc:.3f}")
+    print(f"[Demo] OOB score: {rf.oob_score_}")
+    print(f"[Demo] OOB error: {rf.oob_error_}")
+
