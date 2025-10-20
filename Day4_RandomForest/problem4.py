@@ -144,7 +144,7 @@ class RandomForestScratch:
     - feature subsampling per split (tree's max_features)
     - majority vote
     """
-    def __init__(self, n_trees: int = 25, max_depth: int = 6, min_samples_split: int = 2,
+    def __init__(self, n_trees: int = 25, max_depth: int = 5, min_samples_split: int = 2,
                  max_features: Union[int, str, None] = "sqrt", bootstrap: bool = True,
                  random_state: Optional[int] = 42):
         self.n_trees = n_trees
