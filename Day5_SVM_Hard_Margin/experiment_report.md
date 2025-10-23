@@ -2,7 +2,7 @@
 
 ---
 
-## 📘 Overview
+## Overview
 This experiment demonstrates the implementation and performance of a **Hard-Margin Linear Support Vector Machine (SVM)** built entirely from scratch using **NumPy**.  
 The objective is to **maximize the separating margin** between two linearly separable classes while maintaining **zero classification errors**.
 
@@ -10,7 +10,7 @@ This challenge is part of the *Daily AI Coding Challenge* series — **Week 1, D
 
 ---
 
-## 🎯 Objective
+## Objectives
 To implement a linear SVM that:
 1. **Finds the optimal separating hyperplane** between two linearly separable classes.  
 2. **Maximizes the margin** between classes using only NumPy (no libraries like scikit-learn).  
@@ -18,9 +18,9 @@ To implement a linear SVM that:
 
 ---
 
-## 🧩 Experimental Setup
+## Experimental Setup
 
-### 🧠 Dataset
+### Dataset
 - **Type:** Synthetic, Gaussian-distributed clusters  
 - **Features:** 2 continuous variables (`x₁`, `x₂`)  
 - **Classes:** Binary (−1 and +1)
@@ -30,24 +30,6 @@ To implement a linear SVM that:
 - Positive class: Centered at (2.5, 2.5)
 - Negative class: Centered at (−2.5, −2.5)
 - Gaussian noise added for slight variation
-
-#### Visualization Example
-
-
-   + (Positive Class)
-    ○ ○ ○ ○ ○ ○ ○
-     \       /
-      \     /
-       \   /
-        \ /  ← Decision Boundary
-       / \
-      /   \
-     /     \
-    ● ● ● ● ● ● ●
-   - (Negative Class)
-
-
----
 
 ## ⚙️ Model Configuration
 
@@ -61,7 +43,7 @@ To implement a linear SVM that:
 
 ---
 
-## 🧮 Algorithm Summary
+## Algorithm Summary
 
 The model solves the primal optimization problem:
 
