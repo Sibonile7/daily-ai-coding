@@ -1,5 +1,10 @@
 import numpy as np
-from Day6_PerceptronLearningAlgorithm.problem_perceptron import PerceptronPLA
+# robust import that works locally and in CI
+try:
+    from .problem_perceptron import PerceptronPLA   # when collected as a package
+except ImportError:
+    from problem_perceptron import PerceptronPLA    # when run directly
+
 
 def test_perceptron_converges_on_separable_data():
     rng = np.random.default_rng(0)
