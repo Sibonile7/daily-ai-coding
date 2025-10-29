@@ -1,4 +1,4 @@
-# ✅ Evaluation Rubric — Day 8: Perceptron Learning Algorithm
+# Evaluation Rubric — Day 8: Perceptron Learning Algorithm
 
 | Criterion | Description | Points |
 |------------|--------------|---------|
