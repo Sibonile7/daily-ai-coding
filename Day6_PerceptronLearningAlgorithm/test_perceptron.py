@@ -1,5 +1,5 @@
 import numpy as np
-from problem6 import PerceptronPLA
+from Day6_PerceptronLearningAlgorithm.problem_perceptron import PerceptronPLA
 
 def test_perceptron_converges_on_separable_data():
     rng = np.random.default_rng(0)
